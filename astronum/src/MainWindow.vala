@@ -12,6 +12,8 @@ private ComboBox combobox;
 private Entry entry_name;
 private Entry entry_day;
 private Entry entry_year;
+private Button back_button;
+private Button save_button;
 
 private string[] months = {"January", "February", "March", "April","May","June","July","August","September","October","November","December"};
 
@@ -30,12 +32,30 @@ private string[] months = {"January", "February", "March", "April","May","June",
         }        
 
         construct { 
+        Gtk.HeaderBar headerbar = new Gtk.HeaderBar();
+        headerbar.get_style_context().add_class(Gtk.STYLE_CLASS_FLAT);
+        headerbar.show_close_button = true;
+        set_titlebar(headerbar);
+        back_button = new Gtk.Button ();
+            back_button.set_image (new Gtk.Image.from_icon_name ("go-previous-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            back_button.vexpand = false;
+        save_button = new Gtk.Button();
+            save_button.set_image (new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            save_button.vexpand = false; 
+            back_button.set_tooltip_text("back");
+            save_button.set_tooltip_text("save");
+        headerbar.add(back_button);
+        headerbar.add (save_button);
+        set_widget_visible(back_button,false);
+        set_widget_visible(save_button,false);
+        back_button.clicked.connect (go_to_data_page);
+        save_button.clicked.connect(save_result);
            stack = new Stack ();
         stack.set_transition_duration (600);
         stack.set_transition_type (StackTransitionType.SLIDE_LEFT_RIGHT);
         add (stack);
         entry_name = new Entry();
-        entry_name.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear");
+        entry_name.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear-symbolic");
         entry_name.icon_press.connect ((pos, event) => {
         if (pos == Gtk.EntryIconPosition.SECONDARY) {
             entry_name.set_text ("");
@@ -46,7 +66,7 @@ private string[] months = {"January", "February", "March", "April","May","June",
         hbox_name.pack_start (label_name, false, true, 0);
         hbox_name.pack_start (this.entry_name, true, true, 0);
         entry_day = new Entry();
-        entry_day.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear");
+        entry_day.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear-symbolic");
         entry_day.icon_press.connect ((pos, event) => {
         if (pos == Gtk.EntryIconPosition.SECONDARY) {
               entry_day.set_text("");
@@ -72,7 +92,7 @@ private string[] months = {"January", "February", "March", "April","May","June",
         hbox_month.pack_start(label_month,false,true,0);
         hbox_month.pack_start(this.combobox,true,true,0);
         entry_year = new Entry();
-        entry_year.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear");
+        entry_year.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear-symbolic");
         entry_year.icon_press.connect ((pos, event) => {
         if (pos == Gtk.EntryIconPosition.SECONDARY) {
               entry_year.set_text("");
@@ -91,18 +111,6 @@ private string[] months = {"January", "February", "March", "April","May","June",
         vbox_data_page.pack_start(hbox_year,false,true,0);
         vbox_data_page.pack_start(button_calculate,false,true,0);
         stack.add(vbox_data_page);
-        var toolbar_result_page = new Toolbar ();
-        toolbar_result_page.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
-        var go_to_data_page_icon = new Gtk.Image.from_icon_name ("go-previous", IconSize.SMALL_TOOLBAR);
-        var save_icon = new Gtk.Image.from_icon_name ("document-save", IconSize.SMALL_TOOLBAR);
-        var go_to_data_page_button = new Gtk.ToolButton (go_to_data_page_icon, "Back");     
-        go_to_data_page_button.is_important = true;
-        var save_button = new Gtk.ToolButton (save_icon, "Save");
-        save_button.is_important = true;
-        toolbar_result_page.add(go_to_data_page_button);
-        toolbar_result_page.add(save_button);
-        go_to_data_page_button.clicked.connect(go_to_data_page);
-        save_button.clicked.connect(save_result);
         this.text_view = new TextView ();
         this.text_view.editable = false;
         this.text_view.cursor_visible = false;
@@ -111,7 +119,6 @@ private string[] months = {"January", "February", "March", "April","May","June",
         scroll_result_page.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
         scroll_result_page.add (this.text_view);
         vbox_result_page = new Box(Orientation.VERTICAL,20);
-        vbox_result_page.pack_start(toolbar_result_page,false,true,0);
         vbox_result_page.pack_start(scroll_result_page,true,true,0);
         stack.add(vbox_result_page);
         stack.visible_child = vbox_data_page;
@@ -149,6 +156,8 @@ private string[] months = {"January", "February", "March", "April","May","June",
         int month = combobox.get_active()+1;
         if(input_correct(day,month,year))return;
            stack.visible_child = vbox_result_page;
+           set_widget_visible(back_button,true);
+           set_widget_visible(save_button,true);
            StringBuilder string_builder = new StringBuilder ();
          string_builder.append("name number: ").append(name_number(name).to_string()).append("\nbirth number: ").append(births_number(day,month,year).to_string()).append("\npsychomatrix:\n").append(psychomatrix(day,month,year)).append("\non the Slavic horoscope: ").append(slavian_horoscope(day,month)).append("\non the zodiacal horoscope: ").append(zodiac_horoscope(day,month)).append("\non the Egyptian horoscope: ").append(egypt_horoscope(day,month)).append("\non the eastern horoscope: ").append(ost_horoscope(year));
          text_view.buffer.text = string_builder.str;
@@ -156,6 +165,8 @@ private string[] months = {"January", "February", "March", "April","May","June",
         
         private void go_to_data_page(){
            stack.visible_child = vbox_data_page;
+           set_widget_visible(back_button,false);
+           set_widget_visible(save_button,false);
         }
         
         private void save_result(){
@@ -491,6 +502,11 @@ private string[] months = {"January", "February", "March", "April","May","June",
         return f;
     }
     
+    private void set_widget_visible (Gtk.Widget widget, bool visible) {
+         widget.no_show_all = !visible;
+         widget.visible = visible;
+  }
+
     private void alert (string str){
           var dialog_alert = new Gtk.MessageDialog(this, Gtk.DialogFlags.MODAL, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, str);
           dialog_alert.set_title("Message");
